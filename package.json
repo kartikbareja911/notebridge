@@ -1,0 +1,55 @@
+{
+  "name": "notebridge-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server for semantic search and note management across local and remote transports.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/server.ts",
+    "dev:http": "tsx src/http-server.ts",
+    "start": "node dist/server.js",
+    "start:http": "node dist/http-server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "demo:local": "tsx scripts/demo-local.ts",
+    "demo:remote": "tsx scripts/demo-remote.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:create-key": "tsx src/db/create-api-key.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.71",
+    "@huggingface/transformers": "^4.3.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "ai": "^7.0.107",
+    "dotenv": "^18.0.1",
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.23.0",
+    "pgvector": "^0.3.0",
+    "pino": "^10.3.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^26.6.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.8",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  }
+}

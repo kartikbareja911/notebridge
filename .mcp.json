@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "notebridge": {
+      "command": "node",
+      "args": ["dist/server.js"],
+      "cwd": "C:\\notebridge"
+    }
+  }
+}

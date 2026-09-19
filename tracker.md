@@ -1,0 +1,61 @@
+# Tracker — NoteBridge MCP
+
+Use this as a running checklist. Update status as work progresses. Statuses: `todo`, `in-progress`, `blocked`, `done`.
+
+| #   | Task                                                                     | Phase | Status      | Notes                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------ | ----- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Repo init, TS config, lint/prettier                                      | 0     | done        | Strict TS, ESLint, Prettier, Vitest, and build configuration verified.                                                                                     |
+| 2   | docker-compose with Postgres + pgvector                                  | 0     | done        | Compose configuration validates. Local runtime verification used PostgreSQL 18 + pgvector 0.8.1 in WSL to avoid a port conflict with the running database. |
+| 3   | Install core deps (MCP SDK, Drizzle, Vercel AI SDK, pino)                | 0     | done        | Official MCP SDK, Drizzle, pgvector, AI SDK, pino, and Zod installed.                                                                                      |
+| 4   | `.env.example` written                                                   | 0     | done        | Includes database, embeddings, local auth, logging, and port settings.                                                                                     |
+| 5   | Drizzle schema written (notes, note_chunks, users, api_keys, tool_calls) | 1     | done        | Schema and generated migration match the planned multi-tenant data model.                                                                                  |
+| 6   | Migrations run locally                                                   | 1     | done        | Applied successfully against the WSL PostgreSQL database.                                                                                                  |
+| 7   | Seed script with sample notes                                            | 1     | done        | 18 realistic notes seeded; reruns refresh existing notes and chunks.                                                                                       |
+| 8   | Embedding service                                                        | 1     | done        | OpenAI and local BGE providers implemented; local vectors are zero-padded to 1536 dimensions.                                                              |
+| 9   | Chunking utility                                                         | 1     | done        | Paragraph-aware chunking with oversized-unit splitting and tests.                                                                                          |
+| 10  | MCP server entrypoint (stdio transport)                                  | 2     | done        | Real MCP SDK stdio smoke test passed against PostgreSQL.                                                                                                   |
+| 11  | `search_notes` tool implemented                                          | 2     | done        | Semantic search returns structured chunk results. `budget concerns` ranks `Runway Review` first.                                                           |
+| 12  | `get_note` tool implemented                                              | 2     | done        | User-scoped retrieval verified through the MCP client.                                                                                                     |
+| 13  | `create_note` tool implemented                                           | 2     | done        | Created notes are chunked, embedded, persisted, searchable, and retrievable immediately.                                                                   |
+| 14  | `list_notes` tool implemented                                            | 2     | done        | Tag and date filters are implemented and user-scoped.                                                                                                      |
+| 15  | Connected + tested in Claude Desktop locally                             | 2     | in-progress | Claude Code registration is connected and healthy. Interactive testing is blocked by the CLI login prompt.                                                 |
+| 16  | Milestone demo clip recorded (local)                                     | 2     | todo        |                                                                                                                                                            |
+| 17  | Streamable HTTP transport added                                          | 3     | done        | Stateful `/mcp` transport verified with authenticated MCP clients. Uses current Streamable HTTP instead of deprecated HTTP+SSE.                            |
+| 18  | Remote bearer-key auth integrated                                        | 3     | done        | Hashed bearer keys are checked before MCP dispatch. Live PostgreSQL verification confirmed `last_used_at` updates.                                         |
+| 19  | Multi-tenant query scoping + isolation test                              | 3     | done        | Automated tests and a live two-key demo confirmed user B gets zero search results and null retrieval for user A's note.                                    |
+| 20  | Rate limiting on HTTP endpoint                                           | 3     | done        | In-memory per-key limiter returns `429` with `Retry-After`; covered by an HTTP integration test.                                                           |
+| 21  | Dockerfile written                                                       | 3     | done        | Multi-stage non-root production image and `.dockerignore` added. `docker build -t notebridge-mcp .` and non-root runtime smoke check passed.               |
+| 22  | Deployed to Fly.io/Railway + hosted Postgres                             | 3     | blocked     | No Fly/Railway/GitHub CLI or deployment credentials are available. Local Streamable HTTP is fully verified.                                                |
+| 23  | Milestone demo clip recorded (remote)                                    | 3     | todo        |                                                                                                                                                            |
+| 24  | tool_calls logging added                                                 | 4     | done        | Live PostgreSQL query confirmed persisted rows for both test users. Note content is excluded from input metadata.                                          |
+| 25  | README written (setup, tools, architecture, demo link)                   | 4     | done        | Setup, embedding modes, local/remote client config, container usage, security model, and demo commands are documented. Demo link remains pending.          |
+| 26  | Vitest tests written (chunking, search logic)                            | 4     | done        | Five test files and fourteen tests pass, covering chunking, tool definitions, all tools, auth helpers, HTTP auth, isolation, and rate limiting.            |
+| 27  | GitHub Actions CI configured                                             | 4     | done        | CI runs install, lint, typecheck, tests, and production build on pushes and pull requests.                                                                 |
+| 28  | Stretch: `summarize_topic` tool                                          | 5     | todo        |                                                                                                                                                            |
+| 29  | Stretch: minimal Next.js dashboard                                       | 5     | todo        |                                                                                                                                                            |
+| 30  | Stretch: PDF ingestion endpoint                                          | 5     | todo        |                                                                                                                                                            |
+| 31  | Stretch: auto-tagging on ingest                                          | 5     | todo        |                                                                                                                                                            |
+
+## Blockers Log
+
+_(add rows as they come up)_
+
+| Date       | Blocker                                                                    | Resolution                                                                                                                                 |
+| ---------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-09-19 | Docker Desktop cannot use its stale locked socket.                         | Run PostgreSQL 18 with pgvector 0.8.1 inside WSL Ubuntu for local development. Keep the WSL instance running while using the database.     |
+| 2026-09-19 | Claude Code is installed and registered with NoteBridge but not logged in. | Complete interactive Claude verification after `/login`; protocol behavior is already covered by a real MCP SDK smoke test.                |
+| 2026-09-19 | Docker Desktop stopped while two stale runtime socket entries were locked. | Moved the two runtime directories to timestamped backups, restarted Desktop, and verified `docker version` and the production image build. |
+| 2026-09-19 | Hosting and GitHub CLIs plus deployment credentials are unavailable.       | Complete task 22 after providing a hosting account and hosted pgvector connection string.                                                  |
+| 2026-09-19 | No video recorder is installed, and interactive Claude testing is blocked. | Use the repeatable terminal demos now; record the design-script walkthrough after Claude login.                                            |
+
+## Decisions Log
+
+_(record any deviation from the original spec so future-you knows why)_
+
+| Date       | Decision                                                                            | Reason                                                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-19 | Use the local `Xenova/bge-small-en-v1.5` embedding model for the reproducible demo. | It avoids paid API dependence during development. CLS pooling, q8 quantization, and the required query prefix are used.                           |
+| 2026-09-19 | Zero-pad 384-dimensional local vectors to the schema's 1536 dimensions.             | This preserves cosine similarity while keeping the production-compatible vector column and avoids a migration when switching providers.           |
+| 2026-09-19 | Embed the note title and tags together with each chunk.                             | It improves retrieval for short notes and tag-oriented queries without changing the stored chunk text returned to clients.                        |
+| 2026-09-19 | Use MCP Streamable HTTP rather than legacy HTTP+SSE.                                | Streamable HTTP is the current supported transport, and the installed SDK explicitly deprecates `SSEServerTransport`.                             |
+| 2026-09-19 | Use hashed bearer API keys for remote v1 auth instead of Better Auth.               | MCP clients can send bearer credentials directly, the schema already includes `api_keys`, and this keeps the remote boundary simple and testable. |
