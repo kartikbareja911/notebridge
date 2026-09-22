@@ -60,6 +60,21 @@ export class InMemoryNoteRepository implements NoteRepository {
     return Promise.resolve(toDetail(note));
   }
 
+  deleteNote(userId: string, id: string): Promise<boolean> {
+    const note = this.notes.get(id);
+    if (note?.userId !== userId) {
+      return Promise.resolve(false);
+    }
+    this.notes.delete(id);
+    for (let index = this.chunks.length - 1; index >= 0; index -= 1) {
+      const chunk = this.chunks[index];
+      if (chunk?.noteId === id) {
+        this.chunks.splice(index, 1);
+      }
+    }
+    return Promise.resolve(true);
+  }
+
   createNote(
     userId: string,
     input: Required<Pick<CreateNoteInput, "title" | "content" | "source">> & {

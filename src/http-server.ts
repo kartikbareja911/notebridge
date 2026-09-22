@@ -34,6 +34,7 @@ async function main(): Promise<void> {
         toolCallRecorder,
       }),
     logger,
+    database,
     rateLimiter: new MemoryRateLimiter(
       config.RATE_LIMIT_MAX_REQUESTS,
       config.RATE_LIMIT_WINDOW_MS,

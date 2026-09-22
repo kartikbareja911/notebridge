@@ -53,6 +53,18 @@ export interface SearchResult {
   chunkIndex: number;
 }
 
+export interface TopicSummary {
+  topic: string;
+  summary: string;
+  sources: {
+    id: string;
+    title: string;
+    snippet: string;
+    score: number;
+  }[];
+  count: number;
+}
+
 export interface NoteRepository {
   searchNotes(userId: string, embedding: number[], topK: number): Promise<SearchResult[]>;
   getNote(userId: string, id: string): Promise<NoteDetail | null>;
@@ -63,6 +75,7 @@ export interface NoteRepository {
     },
     chunks: { content: string; embedding: number[] }[],
   ): Promise<NoteDetail>;
+  deleteNote(userId: string, id: string): Promise<boolean>;
   listNotes(userId: string, filter: ListNotesFilter): Promise<NoteSummary[]>;
 }
 
@@ -159,6 +172,14 @@ export class DrizzleNoteRepository implements NoteRepository {
     });
   }
 
+  async deleteNote(userId: string, id: string): Promise<boolean> {
+    const deleted = await this.database
+      .delete(notes)
+      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
+      .returning({ id: notes.id });
+    return deleted.length > 0;
+  }
+
   async listNotes(userId: string, filter: ListNotesFilter): Promise<NoteSummary[]> {
     const conditions = [eq(notes.userId, userId)];
 
@@ -213,7 +234,10 @@ export class NotesService {
   async createNote(userId: string, input: CreateNoteInput): Promise<NoteDetail> {
     const title = input.title.trim();
     const content = input.content.trim();
-    const tags = normalizeTags(input.tags ?? []);
+    let tags = normalizeTags(input.tags ?? []);
+    if (tags.length === 0) {
+      tags = inferAutoTags(title, content);
+    }
 
     if (title.length === 0) {
       throw new Error("Note title cannot be empty");
@@ -258,12 +282,76 @@ export class NotesService {
     );
   }
 
+  async deleteNote(userId: string, id: string): Promise<boolean> {
+    return this.repository.deleteNote(userId, id);
+  }
+
   async listNotes(userId: string, filter: ListNotesFilter = {}): Promise<NoteSummary[]> {
     return this.repository.listNotes(userId, {
       ...filter,
       limit: Math.min(Math.max(filter.limit ?? 50, 1), 100),
     });
   }
+
+  async summarizeTopic(userId: string, topic: string, topK = 5): Promise<TopicSummary> {
+    const results = await this.searchNotes(userId, topic, topK);
+
+    if (results.length === 0) {
+      return {
+        topic,
+        summary: `No relevant notes found for topic "${topic}".`,
+        sources: [],
+        count: 0,
+      };
+    }
+
+    const sources = results.map((r) => ({
+      id: r.id,
+      title: r.title,
+      snippet: r.snippet,
+      score: r.score,
+    }));
+
+    const keyTopics = results.map((r) => `- **${r.title}**: ${r.snippet}`).join("\n");
+    const summary = `Found ${results.length} relevant note(s) regarding "${topic}":\n\n${keyTopics}`;
+
+    return {
+      topic,
+      summary,
+      sources,
+      count: results.length,
+    };
+  }
+}
+
+function inferAutoTags(title: string, content: string): string[] {
+  const text = `${title} ${content}`.toLowerCase();
+  const keywords = [
+    "ai",
+    "api",
+    "architecture",
+    "budget",
+    "career",
+    "database",
+    "demo",
+    "design",
+    "engineering",
+    "finance",
+    "learning",
+    "meetings",
+    "mcp",
+    "performance",
+    "postgres",
+    "product",
+    "reliability",
+    "retrieval",
+    "search",
+    "security",
+    "testing",
+    "vector",
+    "workflow",
+  ];
+  return keywords.filter((word) => text.includes(word)).slice(0, 5);
 }
 
 function normalizeTags(tags: string[]): string[] {

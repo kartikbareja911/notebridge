@@ -13,6 +13,9 @@ import {
 } from "../services/auth.js";
 import type { RateLimiter } from "./rate-limit.js";
 
+import { handleDashboardRequest } from "./dashboard.js";
+import type { Database } from "../db/client.js";
+
 const MCP_PATH = "/mcp";
 const DEFAULT_MAX_BODY_BYTES = 2_000_000;
 
@@ -27,6 +30,7 @@ export interface NoteBridgeHttpServerOptions {
   createServer: (user: AuthenticatedUser) => McpServer;
   logger: Logger;
   rateLimiter: RateLimiter;
+  database?: Database;
   maxBodyBytes?: number;
 }
 
@@ -62,6 +66,10 @@ export function createNoteBridgeHttpServer(
   ): Promise<void> {
     const url = new URL(request.url ?? "/", "http://localhost");
     if (url.pathname !== MCP_PATH) {
+      const handled = await handleDashboardRequest(request, response, options.database);
+      if (handled) {
+        return;
+      }
       sendJson(response, 404, { error: "Not found" });
       return;
     }

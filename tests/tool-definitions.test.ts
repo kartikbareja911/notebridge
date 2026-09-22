@@ -9,7 +9,10 @@ describe("MCP tool catalog", () => {
       "search_notes",
       "get_note",
       "create_note",
+      "delete_note",
       "list_notes",
+      "summarize_topic",
+      "ingest_document",
     ]);
 
     for (const tool of catalog) {
