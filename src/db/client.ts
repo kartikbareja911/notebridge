@@ -6,9 +6,16 @@ import * as schema from "./schema.js";
 const { Pool } = pg;
 
 export function createDatabase(config: Pick<AppConfig, "DATABASE_URL">) {
+  const isRemote =
+    config.DATABASE_URL.includes("supabase") ||
+    config.DATABASE_URL.includes("render") ||
+    config.DATABASE_URL.includes("neon") ||
+    config.DATABASE_URL.includes("sslmode");
+
   const pool = new Pool({
     connectionString: config.DATABASE_URL,
     max: 10,
+    ...(isRemote ? { ssl: { rejectUnauthorized: false } } : {}),
   });
 
   const database = drizzle(pool, { schema });
