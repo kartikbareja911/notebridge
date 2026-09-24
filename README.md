@@ -185,6 +185,12 @@ Keys are issued by your own deployment — every server has its own keys, there
 is no shared one. Run the command wherever `DATABASE_URL` reaches your
 database (locally with `DATABASE_URL` set, a container, or your host's
 console).
+
+**Using someone else's server (easiest, nothing to install):** ask the host
+for the server URL and a personal API key — they mint one per person with the
+command above using your email. Paste the URL and your key into your client
+as shown below, restart the client, and you're in. Notes are private per key,
+so you never see other users' data.
 Then add the server to your client and **restart the client** (configs load
 at startup). Pick your client:
 
