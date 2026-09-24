@@ -169,7 +169,20 @@ authenticated client sees all four tools, semantic search returns the expected
 seeded note, and the second user cannot search or retrieve the first user's
 note.
 
-A client that supports Streamable HTTP can be configured with a bearer header:
+## Connect Your AI Client
+
+You need two things: the server URL (with the `/mcp` path) and an API key.
+Create a key (run where `DATABASE_URL` points at your database):
+
+```powershell
+npx tsx src\db\create-api-key.ts --email "you@example.com" --label "my-client"
+```
+
+Save the printed `nb_...` key. It is stored hashed and never shown again.
+Then add the server to your client and **restart the client** (configs load
+at startup). Pick your client:
+
+**Claude Desktop / Claude Code** (`claude_desktop_config.json`):
 
 ```json
 {
@@ -184,8 +197,33 @@ A client that supports Streamable HTTP can be configured with a bearer header:
 }
 ```
 
+**Cursor**: Settings → MCP → add a server with URL
+`https://notebridge.example.com/mcp` and an `Authorization: Bearer nb_...`
+header.
+
+**Antigravity** (`~/.gemini/config/mcp_config.json`): Antigravity requires
+`serverUrl` instead of `url` for remote servers:
+
+```json
+{
+  "mcpServers": {
+    "notebridge-remote": {
+      "serverUrl": "https://notebridge.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer nb_..."
+      }
+    }
+  }
+}
+```
+
+Verify with the client: ask it to create a note via `create_note`, then find
+it again with `search_notes`. The first embedding call may be slow while the
+model loads; subsequent calls are fast.
+
 Remote client configuration formats vary. If a desktop client only supports
-stdio, use that client's HTTP bridge instead of changing NoteBridge's transport.
+stdio, use that client's HTTP bridge instead of changing NoteBridge's
+transport, or point it at the local entrypoint (`dist/server.js`) instead.
 
 ## Container
 
@@ -195,10 +233,9 @@ Build the production image:
 docker build -t notebridge-mcp .
 ```
 
-Apply migrations once before starting the server:
+Start the server (database migrations run automatically on boot):
 
 ```powershell
-docker run --rm --env-file .env notebridge-mcp node dist/db/migrate.js
 docker run --rm --env-file .env -p 3000:3000 notebridge-mcp
 ```
 
