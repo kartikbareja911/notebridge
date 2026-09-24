@@ -200,8 +200,8 @@ privately — never post keys publicly):
 > Key: `nb_<their-personal-key>`
 > Paste both into your AI client's MCP settings, restart the client, and the
 > note tools will appear. Keep your key private — it identifies you.
-Then add the server to your client and **restart the client** (configs load
-at startup). Pick your client:
+> Then add the server to your client and **restart the client** (configs load
+> at startup). Pick your client:
 
 **Claude Desktop / Claude Code** (`claude_desktop_config.json`):
 
