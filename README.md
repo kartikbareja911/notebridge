@@ -191,6 +191,15 @@ for the server URL and a personal API key — they mint one per person with the
 command above using your email. Paste the URL and your key into your client
 as shown below, restart the client, and you're in. Notes are private per key,
 so you never see other users' data.
+
+Hosts onboarding someone can copy-paste this invite (one key per person, sent
+privately — never post keys publicly):
+
+> Your NoteBridge access:
+> URL: `https://<your-server>/mcp`
+> Key: `nb_<their-personal-key>`
+> Paste both into your AI client's MCP settings, restart the client, and the
+> note tools will appear. Keep your key private — it identifies you.
 Then add the server to your client and **restart the client** (configs load
 at startup). Pick your client:
 
