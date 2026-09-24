@@ -1,10 +1,15 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { pipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
+import { env, pipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
 import { embed, embedMany } from "ai";
 import type { AppConfig } from "../config.js";
 
 const DATABASE_VECTOR_DIMENSIONS = 1536;
 const BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: ";
+
+// ponytail: default HF cache lives inside node_modules (read-only in prod containers); /tmp is always writable
+env.cacheDir =
+  process.env.HF_CACHE_DIR ?? process.env.TRANSFORMERS_CACHE ?? "/tmp/hf-cache";
+env.useBrowserCache = false;
 
 export interface EmbeddingProvider {
   embedQuery(text: string): Promise<number[]>;
