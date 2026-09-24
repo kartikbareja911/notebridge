@@ -29,4 +29,4 @@ USER node
 
 EXPOSE 3000
 
-CMD ["node", "dist/http-server.js"]
+CMD ["sh", "-c", "node dist/db/migrate.js && node dist/http-server.js"]
