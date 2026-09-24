@@ -38,7 +38,9 @@ dispatch. Every note and chunk query is scoped by the authenticated user id.
 
 - Node.js 22 or newer.
 - PostgreSQL with the `pgvector` extension.
-- Optional: an OpenAI API key when using hosted embeddings.
+- No OpenAI key needed if you use local embeddings (`EMBEDDING_PROVIDER=local`,
+  fully offline). An `OPENAI_API_KEY` is only required when
+  `EMBEDDING_PROVIDER=openai` (the default).
 
 The repository includes a Docker Compose service for local PostgreSQL. If
 Docker is unavailable, use any PostgreSQL 16+ instance with pgvector enabled.
@@ -179,6 +181,10 @@ npx tsx src\db\create-api-key.ts --email "you@example.com" --label "my-client"
 ```
 
 Save the printed `nb_...` key. It is stored hashed and never shown again.
+Keys are issued by your own deployment — every server has its own keys, there
+is no shared one. Run the command wherever `DATABASE_URL` reaches your
+database (locally with `DATABASE_URL` set, a container, or your host's
+console).
 Then add the server to your client and **restart the client** (configs load
 at startup). Pick your client:
 
